@@ -16,17 +16,37 @@ exports.composeGearImages = async (req, res, next) => {
     } = req.body || {};
 
     if (!uploaded_image) {
-      return res.status(422).json({ success: false, message: 'uploaded_image is required.' });
+      return res.status(422).json({
+        success: false,
+        message: 'uploaded_image is required.'
+      });
     }
+
     if (!gear_1 || !gear_2) {
-      return res.status(422).json({ success: false, message: 'gear_1 and gear_2 are required.' });
+      return res.status(422).json({
+        success: false,
+        message: 'gear_1 and gear_2 are required.'
+      });
+    }
+
+    if (!gear_1.base_image || !gear_2.base_image) {
+      return res.status(422).json({
+        success: false,
+        message: 'gear_1.base_image and gear_2.base_image are required.'
+      });
     }
 
     const hash = crypto.randomBytes(6).toString('hex');
     const folder = `custom-builder/${product?.handle || 'builder'}/${hash}`;
 
+    /*
+      IMPORTANT:
+      baseImageDataUrl = PRODUCT MOCKUP IMAGE
+      overlayImageDataUrl = USER UPLOADED IMAGE
+    */
     const gear1Buffer = await composeSingleGear({
-      baseImageDataUrl: uploaded_image,
+      baseImageDataUrl: gear_1.base_image,
+      overlayImageDataUrl: gear_1.overlay_image || uploaded_image,
       gearConfig: gear_1,
       textItems: text_items,
       effect,
@@ -34,7 +54,8 @@ exports.composeGearImages = async (req, res, next) => {
     });
 
     const gear2Buffer = await composeSingleGear({
-      baseImageDataUrl: uploaded_image,
+      baseImageDataUrl: gear_2.base_image,
+      overlayImageDataUrl: gear_2.overlay_image || uploaded_image,
       gearConfig: gear_2,
       textItems: text_items,
       effect,
