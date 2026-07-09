@@ -58,6 +58,25 @@
     object-fit: cover;
     display: block;
   }
+
+  .custom-builder-meta {
+    margin-top: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    font-size: 13px;
+    line-height: 1.4;
+  }
+
+  .custom-builder-meta__row {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+
+  .custom-builder-meta__label {
+    font-weight: 600;
+  }
 {%- endstyle -%}
 
 {%- unless settings.cart_type == 'drawer' -%}
@@ -120,10 +139,15 @@
 
               <tbody>
                 {%- for item in cart.items -%}
-                  {% assign preview_image = item.properties['Preview Image'] %}
-                  {% assign gear_1_image = item.properties['Gear 1 Image'] %}
-                  {% assign gear_2_image = item.properties['Gear 2 Image'] %}
+                  {% assign preview_image = item.properties['_custom_preview_image'] %}
+                  {% assign gear_1_image = item.properties['_custom_gear_1_image'] %}
+                  {% assign gear_2_image = item.properties['_custom_gear_2_image'] %}
                   {% assign is_custom_builder = item.properties['_custom_builder'] %}
+
+                  {% assign selected_product = item.properties['Selected Product'] %}
+                  {% assign selected_variant = item.properties['Selected Variant'] %}
+                  {% assign selected_color = item.properties['Selected Color'] %}
+                  {% assign selected_effect = item.properties['Effect'] %}
 
                   <tr class="cart-item" id="CartItem-{{ item.index | plus: 1 }}">
                     <td class="cart-item__media">
@@ -227,27 +251,56 @@
                             {%- endfor -%}
                           {%- endif -%}
 
-                          {%- for property in item.properties -%}
-                            {%- assign property_first_char = property.first | slice: 0 -%}
-                            {%- if property.last != blank and property_first_char != '_' -%}
-                              <div class="product-option">
-                                <dt>{{ property.first }}:</dt>
-                                <dd>
-                                  {%- if property.last contains '/uploads/' or property.last contains 'http' -%}
-                                    <a href="{{ property.last }}" class="link" target="_blank">
-                                      {{ property.first }}
-                                    </a>
-                                  {%- else -%}
-                                    {{ property.last }}
-                                  {%- endif -%}
-                                </dd>
-                              </div>
-                            {%- endif -%}
-                          {%- endfor -%}
+                          {%- unless is_custom_builder == 'true' -%}
+                            {%- for property in item.properties -%}
+                              {%- assign property_first_char = property.first | slice: 0 -%}
+                              {%- if property.last != blank and property_first_char != '_' -%}
+                                <div class="product-option">
+                                  <dt>{{ property.first }}:</dt>
+                                  <dd>
+                                    {%- if property.last contains '/uploads/' or property.last contains 'http' -%}
+                                      <a href="{{ property.last }}" class="link" target="_blank">
+                                        {{ property.first }}
+                                      </a>
+                                    {%- else -%}
+                                      {{ property.last }}
+                                    {%- endif -%}
+                                  </dd>
+                                </div>
+                              {%- endif -%}
+                            {%- endfor -%}
+                          {%- endunless -%}
                         </dl>
 
-                        <p class="product-option">{{ item.selling_plan_allocation.selling_plan.name }}</p>
+                        {% if item.selling_plan_allocation != null %}
+                          <p class="product-option">{{ item.selling_plan_allocation.selling_plan.name }}</p>
+                        {% endif %}
                       {%- endif -%}
+
+                      {% if is_custom_builder == 'true' %}
+                        <div class="custom-builder-meta">
+                          {% if selected_variant != blank %}
+                            <div class="custom-builder-meta__row">
+                              <span class="custom-builder-meta__label">Style:</span>
+                              <span>{{ selected_variant }}</span>
+                            </div>
+                          {% endif %}
+
+                          {% if selected_color != blank %}
+                            <div class="custom-builder-meta__row">
+                              <span class="custom-builder-meta__label">Color:</span>
+                              <span>{{ selected_color }}</span>
+                            </div>
+                          {% endif %}
+
+                          {% if selected_effect != blank %}
+                            <div class="custom-builder-meta__row">
+                              <span class="custom-builder-meta__label">Effect:</span>
+                              <span>{{ selected_effect }}</span>
+                            </div>
+                          {% endif %}
+                        </div>
+                      {% endif %}
 
                       <ul class="discounts list-unstyled" role="list" aria-label="{{ 'customer.order.discount' | t }}">
                         {%- for discount in item.line_level_discount_allocations -%}
