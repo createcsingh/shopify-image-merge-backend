@@ -25,6 +25,26 @@ exports.composeGearImages = async (req, res, next) => {
       product
     } = req.body || {};
 
+    const gear1ComposedImage =
+      gear_1?.composed_image ||
+      gear_1?.preview_image ||
+      gear_1?.overlay_image ||
+      gear_1?.image ||
+      null;
+
+    const gear2ComposedImage =
+      gear_2?.composed_image ||
+      gear_2?.preview_image ||
+      gear_2?.overlay_image ||
+      gear_2?.image ||
+      null;
+
+    const previewImageDataUrl =
+      preview_image ||
+      gear_1?.preview_image ||
+      gear_2?.preview_image ||
+      null;
+
     if (!uploaded_image) {
       return res.status(422).json({
         success: false,
@@ -32,21 +52,21 @@ exports.composeGearImages = async (req, res, next) => {
       });
     }
 
-    if (!gear_1 || !gear_1.composed_image) {
+    if (!gear_1 || !gear1ComposedImage) {
       return res.status(422).json({
         success: false,
         message: 'gear_1.composed_image is required.'
       });
     }
 
-    if (!gear_2 || !gear_2.composed_image) {
+    if (!gear_2 || !gear2ComposedImage) {
       return res.status(422).json({
         success: false,
         message: 'gear_2.composed_image is required.'
       });
     }
 
-    if (!preview_image) {
+    if (!previewImageDataUrl) {
       return res.status(422).json({
         success: false,
         message: 'preview_image is required.'
@@ -57,9 +77,9 @@ exports.composeGearImages = async (req, res, next) => {
     const folder = `custom-builder/${product?.handle || 'builder'}/${hash}`;
 
     const uploadedImageBuffer = dataUrlToBuffer(uploaded_image, 'uploaded_image');
-    const gear1Buffer = dataUrlToBuffer(gear_1.composed_image, 'gear_1.composed_image');
-    const gear2Buffer = dataUrlToBuffer(gear_2.composed_image, 'gear_2.composed_image');
-    const previewBuffer = dataUrlToBuffer(preview_image, 'preview_image');
+    const gear1Buffer = dataUrlToBuffer(gear1ComposedImage, 'gear_1.composed_image');
+    const gear2Buffer = dataUrlToBuffer(gear2ComposedImage, 'gear_2.composed_image');
+    const previewBuffer = dataUrlToBuffer(previewImageDataUrl, 'preview_image');
 
     const [uploadedImageUpload, gear1Upload, gear2Upload, previewUpload] = await Promise.all([
       uploadBufferToCloudinary(uploadedImageBuffer, folder, 'uploaded-image'),
