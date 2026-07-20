@@ -41,8 +41,10 @@ exports.composeGearImages = async (req, res, next) => {
 
     const previewImageDataUrl =
       preview_image ||
-      gear_1?.preview_image ||
       gear_2?.preview_image ||
+      gear_2?.composed_image ||
+      gear_1?.preview_image ||
+      gear_1?.composed_image ||
       null;
 
     if (!uploaded_image) {
